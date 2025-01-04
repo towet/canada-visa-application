@@ -98,6 +98,8 @@ export function ApplicationForm() {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log('Form Values:', values);
+    console.log('Form State:', form.formState);
     try {
       setIsSubmitting(true);
       
@@ -489,7 +491,7 @@ export function ApplicationForm() {
             ) : (
               <Button 
                 type="submit"
-                disabled={isSubmitting || !form.formState.isValid}
+                disabled={isSubmitting}
                 className="ml-auto bg-green-600 hover:bg-green-700"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Application'}
