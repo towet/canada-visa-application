@@ -98,10 +98,24 @@ export function ApplicationForm() {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log('Starting form submission...');
     console.log('Form Values:', values);
     console.log('Form State:', form.formState);
+    
+    if (!validateCurrentStep()) {
+      console.log('Form validation failed');
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields correctly.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
+      console.log('Sending request to Formspree...');
       
       const response = await fetch('https://formspree.io/f/mjkkpryk', {
         method: 'POST',
@@ -115,11 +129,13 @@ export function ApplicationForm() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to submit application');
-      }
-
+      console.log('Response status:', response.status);
       const responseData = await response.json();
+      console.log('Response data:', responseData);
+
+      if (!response.ok) {
+        throw new Error(`Failed to submit application: ${response.status} ${response.statusText}`);
+      }
       
       if (responseData.ok) {
         setIsSuccess(true);
@@ -129,14 +145,15 @@ export function ApplicationForm() {
           duration: 5000,
         });
         form.reset();
+        setStep(1);
       } else {
-        throw new Error('Form submission failed');
+        throw new Error('Form submission failed: ' + JSON.stringify(responseData));
       }
     } catch (error) {
       console.error('Submission error:', error);
       toast({
         title: "Error",
-        description: "Failed to submit application. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to submit application. Please try again.",
         variant: "destructive",
         duration: 5000,
       });
