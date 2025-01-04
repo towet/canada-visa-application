@@ -63,6 +63,7 @@ export function ApplicationForm() {
   const progress = (step / totalSteps) * 100;
 
   const validateCurrentStep = () => {
+    console.log("Validating step:", step);
     const currentFields = {
       1: ['fullName', 'phoneNumber', 'email', 'idNumber', 'dateOfBirth', 'countyOfResidence', 'educationLevel'],
       2: ['jobPosition', 'readyToTravel'],
@@ -73,12 +74,15 @@ export function ApplicationForm() {
     const fieldsToValidate = currentFields[step as keyof typeof currentFields] || [];
     let isValid = true;
 
+    console.log("Fields to validate:", fieldsToValidate);
     for (const field of fieldsToValidate) {
       const fieldState = form.getFieldState(field);
       const value = form.getValues(field);
+      console.log(`Validating field ${field}:`, { value, fieldState });
 
       if (field === 'transactionCode' && step === 3) {
         if (!value || value.length !== 10 || !/^[A-Za-z0-9]+$/.test(value)) {
+          console.log("Transaction code validation failed");
           form.setError('transactionCode', {
             type: 'manual',
             message: 'Transaction code must be exactly 10 characters and contain only letters and numbers'
@@ -89,11 +93,13 @@ export function ApplicationForm() {
       }
 
       if (!value || fieldState.invalid) {
+        console.log(`Field ${field} is invalid or empty`);
         isValid = false;
         form.trigger(field);
       }
     }
 
+    console.log("Step validation result:", isValid);
     return isValid;
   };
 
@@ -219,7 +225,14 @@ export function ApplicationForm() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            console.log("Form submitted");
+            form.handleSubmit(onSubmit)(e);
+          }} 
+          className="space-y-6"
+        >
           {step === 1 && (
             <div className="space-y-4">
               <FormField
@@ -508,6 +521,22 @@ export function ApplicationForm() {
             ) : (
               <Button 
                 type="submit"
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log("Submit button clicked");
+                  if (!validateCurrentStep()) {
+                    console.log("Final step validation failed");
+                    toast({
+                      title: "Error",
+                      description: "Please fill in all required fields correctly.",
+                      variant: "destructive",
+                      duration: 3000,
+                    });
+                    return;
+                  }
+                  console.log("Submitting form...");
+                  form.handleSubmit(onSubmit)(e);
+                }}
                 disabled={isSubmitting}
                 className="ml-auto bg-green-600 hover:bg-green-700"
               >
