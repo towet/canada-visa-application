@@ -103,13 +103,9 @@ export function ApplicationForm() {
     return isValid;
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('Starting form submission...');
-    console.log('Form Values:', values);
-    console.log('Form State:', form.formState);
-    
+  const onSubmit = async (e) => {
+    e.preventDefault();
     if (!validateCurrentStep()) {
-      console.log('Form validation failed');
       toast({
         title: "Error",
         description: "Please fill in all required fields correctly.",
@@ -121,7 +117,7 @@ export function ApplicationForm() {
 
     try {
       setIsSubmitting(true);
-      console.log('Sending request to Formspree...');
+      const formData = form.getValues();
       
       const response = await fetch('https://formspree.io/f/mjkkpryk', {
         method: 'POST',
@@ -130,30 +126,35 @@ export function ApplicationForm() {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          ...values,
-          _subject: `New Canada Visa Application from ${values.fullName}`,
-        }),
+          fullName: formData.fullName,
+          phoneNumber: formData.phoneNumber,
+          email: formData.email,
+          idNumber: formData.idNumber,
+          dateOfBirth: formData.dateOfBirth,
+          countyOfResidence: formData.countyOfResidence,
+          educationLevel: formData.educationLevel,
+          jobPosition: formData.jobPosition,
+          readyToTravel: formData.readyToTravel,
+          transactionCode: formData.transactionCode,
+          communicationPreference: formData.communicationPreference,
+          termsAccepted: formData.termsAccepted,
+          _subject: `New Canada Visa Application from ${formData.fullName}`
+        })
       });
 
-      console.log('Response status:', response.status);
       const responseData = await response.json();
-      console.log('Response data:', responseData);
 
-      if (!response.ok) {
-        throw new Error(`Failed to submit application: ${response.status} ${response.statusText}`);
-      }
-      
-      if (responseData.ok) {
+      if (response.ok) {
         setIsSuccess(true);
         toast({
-          title: "Application Submitted Successfully!",
-          description: "We will review your application and contact you soon.",
+          title: "Success!",
+          description: "Your application has been submitted successfully.",
           duration: 5000,
         });
         form.reset();
         setStep(1);
       } else {
-        throw new Error('Form submission failed: ' + JSON.stringify(responseData));
+        throw new Error(responseData.error || 'Form submission failed');
       }
     } catch (error) {
       console.error('Submission error:', error);
@@ -226,8 +227,7 @@ export function ApplicationForm() {
 
       <Form {...form}>
         <form 
-          method="POST"
-          action="https://formspree.io/f/mjkkpryk"
+          onSubmit={onSubmit}
           className="space-y-6"
         >
           {step === 1 && (
