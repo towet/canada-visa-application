@@ -117,32 +117,24 @@ export function ApplicationForm() {
 
     try {
       setIsSubmitting(true);
-      const formData = form.getValues();
+      const formData = new FormData();
+      const values = form.getValues();
+      
+      // Add all form fields to FormData
+      Object.entries(values).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+      
+      // Add subject line
+      formData.append('_subject', `New Canada Visa Application from ${values.fullName}`);
       
       const response = await fetch('https://formspree.io/f/mjkkpryk', {
         method: 'POST',
+        body: formData,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          phoneNumber: formData.phoneNumber,
-          email: formData.email,
-          idNumber: formData.idNumber,
-          dateOfBirth: formData.dateOfBirth,
-          countyOfResidence: formData.countyOfResidence,
-          educationLevel: formData.educationLevel,
-          jobPosition: formData.jobPosition,
-          readyToTravel: formData.readyToTravel,
-          transactionCode: formData.transactionCode,
-          communicationPreference: formData.communicationPreference,
-          termsAccepted: formData.termsAccepted,
-          _subject: `New Canada Visa Application from ${formData.fullName}`
-        })
+        }
       });
-
-      const responseData = await response.json();
 
       if (response.ok) {
         setIsSuccess(true);
@@ -154,7 +146,8 @@ export function ApplicationForm() {
         form.reset();
         setStep(1);
       } else {
-        throw new Error(responseData.error || 'Form submission failed');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Form submission failed');
       }
     } catch (error) {
       console.error('Submission error:', error);
@@ -322,7 +315,7 @@ export function ApplicationForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Level of Education *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} name="educationLevel">
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select education level" />
