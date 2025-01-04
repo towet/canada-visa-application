@@ -226,11 +226,8 @@ export function ApplicationForm() {
 
       <Form {...form}>
         <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            console.log("Form submitted");
-            form.handleSubmit(onSubmit)(e);
-          }} 
+          method="POST"
+          action="https://formspree.io/f/mjkkpryk"
           className="space-y-6"
         >
           {step === 1 && (
@@ -242,7 +239,7 @@ export function ApplicationForm() {
                   <FormItem>
                     <FormLabel>Full Name *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your full name" {...field} />
+                      <Input name="fullName" placeholder="Enter your full name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -256,7 +253,7 @@ export function ApplicationForm() {
                   <FormItem>
                     <FormLabel>Phone Number *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your phone number" {...field} />
+                      <Input name="phoneNumber" placeholder="Enter your phone number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -270,7 +267,7 @@ export function ApplicationForm() {
                   <FormItem>
                     <FormLabel>Email Address *</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Enter your email" {...field} />
+                      <Input name="email" type="email" placeholder="Enter your email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -284,7 +281,7 @@ export function ApplicationForm() {
                   <FormItem>
                     <FormLabel>ID Number *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your ID number" {...field} />
+                      <Input name="idNumber" placeholder="Enter your ID number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -298,7 +295,7 @@ export function ApplicationForm() {
                   <FormItem>
                     <FormLabel>Date of Birth *</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input name="dateOfBirth" type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -312,7 +309,7 @@ export function ApplicationForm() {
                   <FormItem>
                     <FormLabel>Country of Residence *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your county" {...field} />
+                      <Input name="countyOfResidence" placeholder="Enter your county" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -436,6 +433,7 @@ export function ApplicationForm() {
                     <FormLabel>M-PESA Transaction Code *</FormLabel>
                     <FormControl>
                       <Input 
+                        name="transactionCode" 
                         {...field} 
                         placeholder="Enter 10-character transaction code"
                         maxLength={10}
@@ -521,22 +519,6 @@ export function ApplicationForm() {
             ) : (
               <Button 
                 type="submit"
-                onClick={(e) => {
-                  e.preventDefault();
-                  console.log("Submit button clicked");
-                  if (!validateCurrentStep()) {
-                    console.log("Final step validation failed");
-                    toast({
-                      title: "Error",
-                      description: "Please fill in all required fields correctly.",
-                      variant: "destructive",
-                      duration: 3000,
-                    });
-                    return;
-                  }
-                  console.log("Submitting form...");
-                  form.handleSubmit(onSubmit)(e);
-                }}
                 disabled={isSubmitting}
                 className="ml-auto bg-green-600 hover:bg-green-700"
               >
